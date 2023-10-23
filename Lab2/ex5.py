@@ -1,7 +1,7 @@
 # Function to replace elements under the main diagonal with zeros in a matrix
 def replace_below_diagonal_with_zeros(matrix):
     for i in range(len(matrix)):
-        for j in range(i + 1, len(matrix[i])):
+        for j in range(i):
             matrix[i][j] = 0
     return matrix
 
