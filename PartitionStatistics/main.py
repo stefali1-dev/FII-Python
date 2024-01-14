@@ -4,7 +4,7 @@ from collections import defaultdict
 from display import display_charts
 
 
-def analyze_partition(partition):
+def analyze_partition(partition, target_extension):
     total_files = 0
     total_directories = 0
     extension_count = defaultdict(int)
@@ -31,12 +31,21 @@ def analyze_partition(partition):
     # Separate extensions for sorting by count and size
     extensions_by_count = sorted(extension_count.items(), key=lambda dict: dict[1], reverse=True)
     extensions_by_size = sorted(extension_size.items(), key=lambda dict: dict[1], reverse=True)
+    ebc_copy = extensions_by_count.copy()
 
     # Add "others" category for extensions not in the top 15
     other_count = sum(ext[1] for ext in extensions_by_count[15:])
     other_size = sum(ext[1] for ext in extensions_by_size[15:])
     extensions_by_count = extensions_by_count[:15] + [("Other", other_count)]
     extensions_by_size = extensions_by_size[:15] + [("Other", other_size)]
+
+    # Check if a target extension is specified
+    if target_extension:
+        target_extension = target_extension.lower()
+        if target_extension in extension_count:
+            print(f"\nTarget Extension '{target_extension}' exists in the partition.")
+        else:
+            print(f"\nTarget Extension '{target_extension}' does not exist in the partition.")
 
     print(f"Total Directories: {total_directories}")
     print(f"Total Files: {total_files}")
@@ -50,17 +59,22 @@ def analyze_partition(partition):
     for ext, size in extensions_by_size:
         print(f"{ext}: {size / (1024 * 1024):.2f} MB")
 
-    return extensions_by_count, extensions_by_size, total_directories, total_files
+    return extensions_by_count, extensions_by_size, total_directories, total_files, ebc_copy
 
 
 if __name__ == "__main__":
 
-    if len(sys.argv) != 2:
-        print("Usage: python main.py <partition>")
+    if len(sys.argv) < 2 or len(sys.argv) > 3:
+        print("Usage: python main.py <partition> or python main.py <partition> <extension>")
         sys.exit(1)
 
     partition = sys.argv[1] + ":\\"
+    target_extension = None
 
-    extensions_by_count, extensions_by_size, total_directories, total_files = analyze_partition(partition)
+    if len(sys.argv) == 3:
+        target_extension = sys.argv[2]
 
-    display_charts(extensions_by_count, extensions_by_size, total_directories, total_files)
+    extensions_by_count, extensions_by_size, total_directories, total_files, ebc_copy = (
+        analyze_partition(partition, target_extension))
+
+    display_charts(extensions_by_count, extensions_by_size, total_directories, total_files, ebc_copy)
