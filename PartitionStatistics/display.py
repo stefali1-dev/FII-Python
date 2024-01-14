@@ -1,9 +1,10 @@
 import os
+import time
 
 import matplotlib.pyplot as plt
 
 
-def display_charts(extensions_by_count, extensions_by_size, total_directories, total_files):
+def display_charts(extensions_by_count, extensions_by_size, total_directories, total_files, ebc_copy):
     # Plot pie chart for total number of files and directories
     plt.pie([total_directories, total_files], labels=['Directories', 'Files'], autopct='%1.1f%%')
     plt.title('Total Number of Directories and Files')
@@ -40,13 +41,15 @@ def display_charts(extensions_by_count, extensions_by_size, total_directories, t
     plt.savefig('pie_chart_size.png')
     plt.show()
 
-    # Plot horizontal bar chart for each letter of the alphabet
-    for letter in 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz':
-        extensions_by_letter = [(ext, count) for ext, count in extensions_by_count if ext.startswith('.' + letter)]
+    # Plot horizontal bar chart for each letter of the alphabet (top 15 extensions by count)
+    for letter in 'abcdefghijklmnopqrstuvwxyz':
+        extensions_by_letter = [(ext, count) for ext, count in ebc_copy if ext.startswith('.' + letter)]
         if extensions_by_letter:
-            plt.figure(figsize=(10, 4))
-            plt.barh([ext[0] for ext in extensions_by_letter], [ext[1] for ext in extensions_by_letter])
+            top_extensions_by_letter = sorted(extensions_by_letter, key=lambda x: x[1], reverse=True)[:15]
+            plt.figure(figsize=(10, 8))
+            plt.barh([ext[0] for ext in top_extensions_by_letter], [ext[1] for ext in top_extensions_by_letter])
             plt.xlabel('File Count')
-            plt.title(f'Extensions Starting with {letter}')
+            plt.title(f'Top Extensions Starting with {letter} by Count')
             plt.savefig(f'.\\alphabetic_charts\\horizontal_bar_chart_{letter}.png')
-            plt.show()
+
+            plt.close()
